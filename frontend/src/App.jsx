@@ -36,7 +36,19 @@ export default function App() {
         position="top-center"
         toastOptions={{
           duration: 3000,
-          style: { fontFamily: 'inherit' },
+          className: '!font-sans !text-sm !shadow-lg !shadow-slate-900/10 !border !border-slate-100',
+          style: {
+            fontFamily: 'inherit',
+            borderRadius: '14px',
+            padding: '12px 16px',
+            maxWidth: 'min(92vw, 360px)',
+          },
+          success: {
+            iconTheme: { primary: '#1e40af', secondary: '#fff' },
+          },
+          error: {
+            iconTheme: { primary: '#dc2626', secondary: '#fff' },
+          },
         }}
       />
       <AppLayout />

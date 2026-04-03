@@ -82,11 +82,14 @@ export default function CreatePartyPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <h2 className="text-2xl font-extrabold text-gray-900 mb-1">파티 만들기</h2>
-      <p className="text-sm text-gray-500 mb-6">출발 정보 설정 후 모집을 시작하세요.</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100/90 via-white to-sky-50/30">
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-1 tracking-tight">파티 만들기</h2>
+          <p className="text-sm text-slate-500 font-medium">출발 정보 설정 후 모집을 시작하세요.</p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-4 bg-white/95 border border-slate-200/80 rounded-3xl p-6 shadow-xl shadow-slate-900/[0.05]">
         <div className="grid sm:grid-cols-2 gap-3">
           <SelectField
             label="출발지"
@@ -177,15 +180,15 @@ export default function CreatePartyPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-blue-700 text-white font-semibold hover:bg-blue-800 disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-800 to-blue-600 text-white font-bold shadow-md shadow-blue-900/15 hover:brightness-105 active:scale-[0.99] disabled:opacity-60 transition-all"
         >
           {loading ? '생성 중...' : '파티 생성'}
         </button>
       </form>
 
       {calendarOpen && (
-        <div className="fixed inset-0 z-[70] bg-black/35 flex items-end sm:items-center justify-center p-3" onClick={() => setCalendarOpen(false)}>
-          <div className="w-full max-w-2xl bg-white rounded-2xl p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-[2px] flex items-end sm:items-center justify-center p-3" onClick={() => setCalendarOpen(false)}>
+          <div className="w-full max-w-2xl bg-white rounded-3xl p-5 shadow-2xl border border-slate-100" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-bold text-gray-900">출발 시간 캘린더</h3>
               <button className="text-sm text-gray-400 hover:text-gray-600" onClick={() => setCalendarOpen(false)}>닫기</button>
@@ -274,6 +277,7 @@ export default function CreatePartyPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -317,11 +321,11 @@ function isPastSlot(dateKey, hhmm) {
 function SelectField({ label, value, onChange, options }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+      <label className="block text-sm font-semibold text-slate-700 mb-1.5">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
         {options.map((opt) => (
           <option key={opt.key} value={opt.key}>

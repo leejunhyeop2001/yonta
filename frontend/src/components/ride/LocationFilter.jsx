@@ -31,8 +31,8 @@ export default function LocationFilter({ value, onChange }) {
               rounded-full text-sm font-semibold
               transition-all duration-200 whitespace-nowrap
               ${isActive
-                ? 'bg-blue-800 text-white shadow-lg shadow-blue-800/25 scale-105'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:scale-95'
+                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-[1.02] ring-1 ring-white/10'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 active:scale-95'
               }
             `}
           >

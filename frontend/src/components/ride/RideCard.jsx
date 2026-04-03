@@ -27,13 +27,14 @@ export default function RideCard({ party, onClick }) {
 
   return (
     <button
+      type="button"
       onClick={() => onClick?.(party)}
       className={`
-        group w-full text-left rounded-2xl border-2 p-4
+        group w-full text-left rounded-2xl border p-4
         transition-all duration-200
         ${isFull
-          ? 'border-gray-100 bg-gray-50/50 opacity-60'
-          : 'border-gray-100 bg-white hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md'
+          ? 'border-slate-100 bg-slate-50/60 opacity-65'
+          : 'border-slate-200/90 bg-white/95 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-900/5 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md ring-1 ring-transparent hover:ring-sky-100/80'
         }
       `}
     >

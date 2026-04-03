@@ -91,28 +91,37 @@ export default function MyPartyPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <h2 className="text-2xl font-extrabold text-gray-900 mb-1">마이페이지</h2>
-      <p className="text-sm text-gray-500 mb-5">진행중 파티와 지난 파티 기록, 평가를 관리하세요.</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100/90 via-white to-sky-50/30">
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-1 tracking-tight">마이페이지</h2>
+          <p className="text-sm text-slate-500 font-medium">진행중 파티와 지난 파티 기록, 평가를 관리하세요.</p>
+        </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-5">
-        <button
-          onClick={() => setTab('active')}
-          className={`rounded-xl border py-2.5 text-sm font-semibold ${
-            tab === 'active' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500'
-          }`}
-        >
-          진행중 파티 {activeParties.length}
-        </button>
-        <button
-          onClick={() => setTab('history')}
-          className={`rounded-xl border py-2.5 text-sm font-semibold ${
-            tab === 'history' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500'
-          }`}
-        >
-          지난 파티 기록 {historyParties.length}
-        </button>
-      </div>
+        <div className="grid grid-cols-2 gap-2 mb-6 p-1 rounded-2xl bg-slate-100/90 ring-1 ring-slate-200/60">
+          <button
+            type="button"
+            onClick={() => setTab('active')}
+            className={`rounded-xl py-3 text-sm font-bold transition-all ${
+              tab === 'active'
+                ? 'bg-white text-slate-900 shadow-md shadow-slate-900/10 ring-1 ring-slate-200/80'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            진행중 {activeParties.length}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('history')}
+            className={`rounded-xl py-3 text-sm font-bold transition-all ${
+              tab === 'history'
+                ? 'bg-white text-slate-900 shadow-md shadow-slate-900/10 ring-1 ring-slate-200/80'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            지난 기록 {historyParties.length}
+          </button>
+        </div>
 
       {loading ? (
         <div className="py-16 text-center text-gray-400">불러오는 중...</div>
@@ -131,8 +140,8 @@ export default function MyPartyPage() {
       )}
 
       {selected && (
-        <div className="fixed inset-0 bg-black/30 z-[60] flex items-end justify-center" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-3xl bg-white rounded-t-3xl p-5 pb-7" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[60] flex items-end justify-center" onClick={() => setSelected(null)}>
+          <div className="w-full max-w-3xl bg-white rounded-t-3xl p-5 pb-7 border-t border-slate-100 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <p className="text-lg font-bold text-gray-900 mb-2">내 파티 상세</p>
             <p className="text-sm text-gray-500 mb-3">
               익명 인원: {selected.currentCount}/{selected.maxCount}명
@@ -156,8 +165,8 @@ export default function MyPartyPage() {
       )}
 
       {reviewTarget && (
-        <div className="fixed inset-0 bg-black/30 z-[70] flex items-end justify-center" onClick={() => setReviewTarget(null)}>
-          <div className="w-full max-w-2xl bg-white rounded-t-3xl p-5 pb-7" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[70] flex items-end justify-center" onClick={() => setReviewTarget(null)}>
+          <div className="w-full max-w-2xl bg-white rounded-t-3xl p-5 pb-7 border-t border-slate-100 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-gray-900 mb-1">지난 파티 평가</h3>
             <p className="text-sm text-gray-500 mb-4">
               {reviewTarget.party.departureTime.slice(0, 16).replace('T', ' ')}
@@ -203,6 +212,7 @@ export default function MyPartyPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -210,7 +220,7 @@ export default function MyPartyPage() {
 function HistoryCard({ item, onReview }) {
   const party = item.party;
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-sm shadow-slate-900/[0.04]">
       <p className="text-xs text-gray-400 mb-1">{party.departureTime.slice(0, 16).replace('T', ' ')}</p>
       <p className="text-sm font-bold text-gray-900 mb-1">
         {labelOf(party.departure)} {'->'} {labelOf(party.destination)}
