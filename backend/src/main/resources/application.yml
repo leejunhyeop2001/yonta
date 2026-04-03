@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: yonta-backend
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  datasource:
+    url: jdbc:h2:file:./data/yonta;AUTO_SERVER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+    database-platform: org.hibernate.dialect.H2Dialect
+
+server:
+  port: 8080
+
+admin:
+  secret-key: ${ADMIN_SECRET_KEY:yonta-admin-2026}
+
+jwt:
+  secret: ${JWT_SECRET:yonta-default-jwt-secret-key-for-development-only}
+  access-token-validity: 3600000
+  refresh-token-validity: 604800000
+
+logging:
+  level:
+    com.yonta: DEBUG
+    org.hibernate.SQL: DEBUG
