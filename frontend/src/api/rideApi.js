@@ -10,6 +10,11 @@ export const joinParty = (id) => api.post(`/api/parties/${id}/join`);
 
 export const leaveParty = (id) => api.delete(`/api/parties/${id}/leave`);
 
+export const dissolveParty = (id) => api.delete(`/api/parties/${id}`);
+
+export const transferHost = (id, targetUserId) =>
+  api.post(`/api/parties/${id}/transfer-host`, null, { params: { targetUserId } });
+
 export const getMyParties = () => api.get('/api/parties/me');
 
 export const getMyPartyHistory = () => api.get('/api/parties/me/history');

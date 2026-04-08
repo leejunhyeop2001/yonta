@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import RideList from '../components/ride/RideList';
 import {
-  getMyParties, getMyPartyHistory, getPartyDetail, leaveParty, submitPartyReview,
+  getMyParties, getMyPartyHistory, getPartyDetail, leaveParty, dissolveParty, transferHost, submitPartyReview,
 } from '../api/rideApi';
 import { LOCATIONS } from '../utils/constants';
 
@@ -61,6 +61,37 @@ export default function MyPartyPage() {
       await loadMyPage();
     } catch (err) {
       toast.error(err.response?.data?.message || '나가기에 실패했습니다.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDissolve = async () => {
+    if (!selected?.id) return;
+    setActionLoading(true);
+    try {
+      await dissolveParty(selected.id);
+      toast.success('파티가 해산되었습니다.');
+      setSelected(null);
+      await loadMyPage();
+    } catch (err) {
+      toast.error(err.response?.data?.message || '해산에 실패했습니다.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleTransferHost = async (targetUserId) => {
+    if (!selected?.id) return;
+    setActionLoading(true);
+    try {
+      await transferHost(selected.id, targetUserId);
+      toast.success('방장이 위임되었습니다.');
+      const res = await getPartyDetail(selected.id);
+      setSelected(res.data.data);
+      await loadMyPage();
+    } catch (err) {
+      toast.error(err.response?.data?.message || '방장 위임에 실패했습니다.');
     } finally {
       setActionLoading(false);
     }
@@ -142,24 +173,72 @@ export default function MyPartyPage() {
       {selected && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[60] flex items-end justify-center" onClick={() => setSelected(null)}>
           <div className="w-full max-w-3xl bg-white rounded-t-3xl p-5 pb-7 border-t border-slate-100 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <p className="text-lg font-bold text-gray-900 mb-2">내 파티 상세</p>
-            <p className="text-sm text-gray-500 mb-3">
-              익명 인원: {selected.currentCount}/{selected.maxCount}명
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-lg font-bold text-gray-900">내 파티 상세</p>
+              {selected.isHost && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200">
+                  방장
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              인원: {selected.currentCount}/{selected.maxCount}명
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-              {selected.anonymousParticipants?.map((alias) => (
-                <div key={alias} className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700">
-                  👤 {alias}
+
+            {/* 멤버 목록 (상세 API에서 members 제공) */}
+            <div className="space-y-2 mb-4">
+              {(selected.members ?? []).map((member) => (
+                <div key={member.userId} className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
+                      {member.alias?.slice(-1) ?? '?'}
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700">{member.alias}</span>
+                    {member.isHost && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">방장</span>
+                    )}
+                  </div>
+                  {selected.isHost && !member.isHost && (
+                    <button
+                      onClick={() => handleTransferHost(member.userId)}
+                      disabled={actionLoading}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                    >
+                      방장 위임
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
-            <button
-              onClick={handleLeave}
-              disabled={actionLoading}
-              className="w-full py-3 rounded-xl bg-red-50 text-red-600 font-semibold border border-red-200 hover:bg-red-100 disabled:opacity-60"
-            >
-              파티 나가기
-            </button>
+
+            {/* 방장 + 혼자: 해산 버튼 */}
+            {selected.isHost && selected.currentCount === 1 && (
+              <button
+                onClick={handleDissolve}
+                disabled={actionLoading}
+                className="w-full py-3 rounded-xl bg-red-50 text-red-600 font-semibold border border-red-200 hover:bg-red-100 disabled:opacity-60"
+              >
+                {actionLoading ? '처리 중...' : '파티 해산'}
+              </button>
+            )}
+
+            {/* 방장 + 여러명: 위임 안내 + 나가기 */}
+            {selected.isHost && selected.currentCount > 1 && (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-400 text-center">다른 멤버에게 방장을 위임한 후 나갈 수 있습니다.</p>
+              </div>
+            )}
+
+            {/* 게스트: 나가기 버튼 */}
+            {!selected.isHost && (
+              <button
+                onClick={handleLeave}
+                disabled={actionLoading}
+                className="w-full py-3 rounded-xl bg-red-50 text-red-600 font-semibold border border-red-200 hover:bg-red-100 disabled:opacity-60"
+              >
+                {actionLoading ? '처리 중...' : '파티 나가기'}
+              </button>
+            )}
           </div>
         </div>
       )}

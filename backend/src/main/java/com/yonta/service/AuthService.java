@@ -33,6 +33,10 @@ public class AuthService {
     public void sendVerificationCode(String email) {
         validateYonseiEmail(email);
 
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
         if (!verificationStore.canResend(email)) {
             throw new CustomException(ErrorCode.TOO_MANY_REQUESTS);
         }

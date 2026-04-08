@@ -71,6 +71,25 @@ public class PartyController {
         return ResponseEntity.ok(ApiResponse.ok(updated, "파티에서 나왔습니다."));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> dissolveParty(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        Long userId = extractRequiredUserId(authHeader);
+        partyService.dissolveParty(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(null, "파티가 해산되었습니다."));
+    }
+
+    @PostMapping("/{id}/transfer-host")
+    public ResponseEntity<ApiResponse<PartyResponse>> transferHost(
+            @PathVariable Long id,
+            @RequestParam Long targetUserId,
+            @RequestHeader("Authorization") String authHeader) {
+        Long userId = extractRequiredUserId(authHeader);
+        PartyResponse updated = partyService.transferHost(id, userId, targetUserId);
+        return ResponseEntity.ok(ApiResponse.ok(updated, "방장이 위임되었습니다."));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<PartyResponse>>> getMyParties(
             @RequestHeader("Authorization") String authHeader) {

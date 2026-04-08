@@ -49,4 +49,12 @@ public class Participant extends BaseTimeEntity {
                 .isHost(false)
                 .build();
     }
+
+    public void promoteToHost() {
+        this.isHost = true;
+    }
+
+    public void demoteToGuest() {
+        this.isHost = false;
+    }
 }

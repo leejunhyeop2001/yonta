@@ -79,11 +79,11 @@ export default function TimeSlotPicker({ selectedDate, value, onChange }) {
     else setActivePeriod('저녁/밤');
   }, [slots, activePeriod]);
 
-  const currentSlots = activePeriod ? (slots[activePeriod] || []) : [];
   const colors = PERIOD_COLORS[activePeriod] || PERIOD_COLORS['오후'];
   const dark = activePeriod ? isDark(activePeriod) : false;
 
   const hourGroups = useMemo(() => {
+    const currentSlots = activePeriod ? (slots[activePeriod] || []) : [];
     const groups = {};
     currentSlots.forEach((s) => {
       const hour = s.label.split(':')[0];
@@ -91,7 +91,7 @@ export default function TimeSlotPicker({ selectedDate, value, onChange }) {
       groups[hour].push(s);
     });
     return Object.entries(groups);
-  }, [currentSlots]);
+  }, [slots, activePeriod]);
 
   if (loading) {
     return (

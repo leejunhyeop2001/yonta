@@ -45,7 +45,7 @@ public class PartyService {
         TaxiParty party = getParty(partyId);
         List<Participant> participants = participantRepository.findByTaxiPartyId(partyId);
         boolean mine = userId != null && participantRepository.existsByTaxiPartyIdAndUserId(partyId, userId);
-        return PartyResponse.from(party, participants, mine);
+        return PartyResponse.from(party, participants, mine, userId);
     }
 
     @Transactional
@@ -110,6 +110,43 @@ public class PartyService {
         participantRepository.delete(participant);
         party.decrementCount();
         return PartyResponse.from(party, false);
+    }
+
+    @Transactional
+    public void dissolveParty(Long partyId, Long userId) {
+        TaxiParty party = getParty(partyId);
+
+        if (!party.getHost().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_PARTY_HOST);
+        }
+        if (party.getCurrentCount() > 1) {
+            throw new CustomException(ErrorCode.PARTY_NOT_EMPTY);
+        }
+
+        taxiPartyRepository.delete(party);
+    }
+
+    @Transactional
+    public PartyResponse transferHost(Long partyId, Long userId, Long targetUserId) {
+        TaxiParty party = getParty(partyId);
+
+        if (!party.getHost().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_PARTY_HOST);
+        }
+
+        Participant currentHostParticipant = participantRepository.findByTaxiPartyIdAndUserId(partyId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTY_NOT_JOINABLE));
+
+        Participant newHostParticipant = participantRepository.findByTaxiPartyIdAndUserId(partyId, targetUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSFER_TARGET_NOT_IN_PARTY));
+
+        User newHost = newHostParticipant.getUser();
+        currentHostParticipant.demoteToGuest();
+        newHostParticipant.promoteToHost();
+        party.changeHost(newHost);
+
+        List<Participant> participants = participantRepository.findByTaxiPartyId(partyId);
+        return PartyResponse.from(party, participants, true, userId);
     }
 
     @Transactional(readOnly = true)

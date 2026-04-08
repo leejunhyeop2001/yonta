@@ -110,4 +110,8 @@ public class TaxiParty extends BaseTimeEntity {
                 && this.currentCount < this.maxCount
                 && this.departureTime.isAfter(LocalDateTime.now());
     }
+
+    public void changeHost(User newHost) {
+        this.host = newHost;
+    }
 }

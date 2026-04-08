@@ -4,10 +4,6 @@ import EmailVerification from '../components/auth/EmailVerification';
 export default function SignUpPage() {
   const navigate = useNavigate();
 
-  const handleVerified = (email) => {
-    console.log('Verified email:', email);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
       {/* Header */}
@@ -27,7 +23,7 @@ export default function SignUpPage() {
 
       {/* Content */}
       <main className="flex-1 flex items-start justify-center pt-12 px-4">
-        <EmailVerification onVerified={handleVerified} />
+        <EmailVerification />
       </main>
     </div>
   );
