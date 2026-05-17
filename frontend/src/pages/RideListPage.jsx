@@ -6,9 +6,9 @@ import RideList from '../components/ride/RideList';
 import { getAvailableParties, getPartyDetail, joinParty, leaveParty } from '../api/rideApi';
 import { getNextDays, getDateLabel, formatDate } from '../utils/formatters';
 import toast from 'react-hot-toast';
+import { usePartyRealtime } from '../hooks/usePartyRealtime';
 
 const CAMPUS_KEY = 'CAMPUS';
-const POLLING_MS = 3000;
 const PERIODS = [
   { key: 'DAWN', label: '새벽', icon: '🌙', startHour: 0, endHour: 5 },
   { key: 'MORNING', label: '오전', icon: '🌅', startHour: 6, endHour: 11 },
@@ -90,12 +90,18 @@ export default function RideListPage() {
   useEffect(() => {
     if (!selectedPartyId) return undefined;
     loadPartyDetail(selectedPartyId);
-    const id = setInterval(() => {
-      loadPartyDetail(selectedPartyId);
-      loadParties();
-    }, POLLING_MS);
-    return () => clearInterval(id);
-  }, [selectedPartyId, loadPartyDetail, loadParties]);
+  }, [selectedPartyId, loadPartyDetail]);
+
+  usePartyRealtime(
+    selectedPartyId,
+    () => {
+      if (selectedPartyId) {
+        loadPartyDetail(selectedPartyId);
+        loadParties();
+      }
+    },
+    Boolean(selectedPartyId),
+  );
 
   const filteredByBase = useMemo(() => {
     return parties.filter((p) => {
@@ -371,7 +377,7 @@ function PartyDetailSheet({ party, loading, actionLoading, onClose, onJoin, onLe
       >
         <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-gray-900">파티 상세 (실시간 갱신)</h3>
+          <h3 className="text-lg font-bold text-gray-900">파티 상세</h3>
           <button className="text-gray-400 hover:text-gray-600" onClick={onClose}>닫기</button>
         </div>
 
@@ -384,7 +390,7 @@ function PartyDetailSheet({ party, loading, actionLoading, onClose, onJoin, onLe
               <p className="text-2xl font-extrabold text-slate-900 tabular-nums">
                 {party.currentCount}/{party.maxCount}명
               </p>
-              <p className="text-xs text-blue-600/80 mt-1 font-medium">3초마다 자동 갱신됩니다.</p>
+              <p className="text-xs text-blue-600/80 mt-1 font-medium">참여·탈퇴 시 실시간 반영됩니다.</p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

@@ -39,6 +39,12 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 10)
     private Role role;
 
+    @Column(nullable = false)
+    private int noShowCount;
+
+    @Column
+    private java.time.LocalDateTime suspendedUntil;
+
     @Builder
     public User(String studentId, String name, String email, String password, Gender gender) {
         this.studentId = studentId;
@@ -49,6 +55,7 @@ public class User extends BaseTimeEntity {
         this.mannerTemp = 36.5;
         this.verified = false;
         this.role = Role.USER;
+        this.noShowCount = 0;
     }
 
     public void verify() {
@@ -57,6 +64,18 @@ public class User extends BaseTimeEntity {
 
     public void updateMannerTemp(double delta) {
         this.mannerTemp = Math.max(0, Math.min(100, this.mannerTemp + delta));
+    }
+
+    public boolean isSuspended() {
+        return suspendedUntil != null && suspendedUntil.isAfter(java.time.LocalDateTime.now());
+    }
+
+    public void recordNoShow(int suspendDays) {
+        this.noShowCount++;
+        updateMannerTemp(-5.0);
+        if (this.noShowCount >= 2) {
+            this.suspendedUntil = java.time.LocalDateTime.now().plusDays(suspendDays);
+        }
     }
 
     public boolean isAdmin() {

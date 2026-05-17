@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -16,6 +17,8 @@ public class PartyHistoryResponse {
     private Integer myRating;
     private String myComment;
     private LocalDateTime reviewedAt;
+    private List<HistoryMemberResponse> otherMembers;
+    private List<ReceivedReviewResponse> receivedReviews;
 
     public static PartyHistoryResponse from(TaxiParty party, PartyReview review, boolean mine) {
         return PartyHistoryResponse.builder()
@@ -24,6 +27,8 @@ public class PartyHistoryResponse {
                 .myRating(review != null ? review.getRating() : null)
                 .myComment(review != null ? review.getComment() : null)
                 .reviewedAt(review != null ? review.getCreatedAt() : null)
+                .otherMembers(List.of())
+                .receivedReviews(List.of())
                 .build();
     }
 }

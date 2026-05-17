@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Header from './components/common/Header';
+import { lazy, Suspense } from 'react';
+
+const Header = lazy(() => import('./components/common/Header'));
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import RideListPage from './pages/RideListPage';
@@ -14,7 +16,11 @@ function AppLayout() {
 
   return (
     <>
-      {!hideHeader && <Header />}
+      {!hideHeader && (
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
+      )}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<AuthPage />} />
