@@ -1,0 +1,35 @@
+{
+  "name": "yonta-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "연타(연세 타요) - 연세대학교 미래캠퍼스 택시 합승 플랫폼",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@stomp/stompjs": "^7.3.0",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.13",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "react-router-dom": "^7.4.0",
+    "socket.io-client": "^4.8.3",
+    "sockjs-client": "^1.6.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@tailwindcss/vite": "^4.1.1",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "tailwindcss": "^4.1.1",
+    "vite": "^6.2.4"
+  }
+}

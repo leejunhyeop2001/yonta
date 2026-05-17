@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+enum PartyStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum Role {
+  HOST
+  MEMBER
+}
+
+enum ArrivalStatus {
+  PENDING
+  ARRIVED
+  NOSHOW
+}
+
+enum Gender {
+  UNSPECIFIED
+  MALE
+  FEMALE
+}
+
+enum NoShowReportStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+enum NotificationType {
+  MEMBER_JOINED
+  MEMBER_LEFT
+  DEPARTURE_SOON
+  PARTY_DEPARTED
+  PARTY_SETTLED
+}
+
+model User {
+  id                String          @id @default(uuid())
+  email             String          @unique
+  fullName         String?
+  gender            Gender          @default(UNSPECIFIED)
+  prefersQuiet      Boolean         @default(false)
+  mannerTemperature Int            @default(100)
+  suspendedUntil    DateTime?
+  createdAt         DateTime       @default(now())
+  verifiedAt        DateTime?
+  passwordHash      String?
+
+  hostedParties   Party[]         @relation("PartyHost")
+  memberships      PartyMember[]
+  mannerLogs      MannerChangeLog[]
+  messages        PartyMessage[]
+  partyReviews    PartyReview[]
+  memberReviewsGiven    MemberReview[] @relation("MemberReviewReviewer")
+  memberReviewsReceived MemberReview[] @relation("MemberReviewReviewee")
+  noShowReportsFiled    NoShowReport[] @relation("NoShowReporter")
+  noShowReportsReceived NoShowReport[] @relation("NoShowReported")
+  notifications   UserNotification[]
+}
+
+model EmailOtp {
+  id         String   @id @default(uuid())
+  email      String
+  otpHash    String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  verifiedAt DateTime?
+
+  @@index([email, expiresAt])
+}
+
+model Party {
+  id             String       @id @default(uuid())
+  hostId         String
+  host           User         @relation("PartyHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  startTimeSlot DateTime
+  startTime     DateTime
+
+  pickupLat      Float
+  pickupLng      Float
+  destinationLat Float
+  destinationLng Float
+  pickupName       String       @default("")
+  destinationName  String       @default("")
+
+  preferSameGender Boolean      @default(false)
+  preferQuiet      Boolean      @default(false)
+
+  capacity       Int
+  totalTaxiFare  Int?
+  status         PartyStatus  @default(PENDING)
+  createdAt      DateTime     @default(now())
+  departureAt    DateTime?
+  cancelledAt    DateTime?
+
+  members PartyMember[]
+  mannerLogs MannerChangeLog[]
+  messages   PartyMessage[]
+  partyReviews PartyReview[]
+  memberReviews MemberReview[]
+  noShowReports NoShowReport[]
+
+  @@index([startTimeSlot, status])
+}
+
+model PartyMember {
+  id String @id @default(uuid())
+
+  partyId String
+  party   Party  @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role              Role           @default(MEMBER)
+  joinedAt          DateTime       @default(now())
+  leftAt            DateTime?
+  arrivalStatus    ArrivalStatus  @default(PENDING)
+  arrivalConfirmedAt DateTime?
+  arrivalLat       Float?
+  arrivalLng       Float?
+
+  @@unique([partyId, userId])
+  @@index([userId, partyId])
+}
+
+model PartyMessage {
+  id        String   @id @default(uuid())
+  partyId   String
+  party     Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([partyId, createdAt])
+}
+
+model MannerChangeLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  partyId   String?
+  party     Party?   @relation(fields: [partyId], references: [id], onDelete: SetNull)
+
+  delta     Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model PartyReview {
+  id         String   @id @default(uuid())
+  partyId    String
+  party      Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@unique([partyId, reviewerId])
+  @@index([partyId])
+}
+
+model MemberReview {
+  id         String   @id @default(uuid())
+  partyId    String
+  party      Party    @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("MemberReviewReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  revieweeId String
+  reviewee   User     @relation("MemberReviewReviewee", fields: [revieweeId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@unique([partyId, reviewerId, revieweeId])
+  @@index([revieweeId])
+}
+
+model NoShowReport {
+  id             String             @id @default(uuid())
+  partyId        String
+  party          Party              @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User               @relation("NoShowReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUserId String
+  reportedUser   User               @relation("NoShowReported", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reason         String
+  status         NoShowReportStatus @default(PENDING)
+  createdAt      DateTime           @default(now())
+
+  @@unique([partyId, reporterId, reportedUserId])
+  @@index([partyId, reportedUserId, status])
+}
+
+model UserNotification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  partyId   String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read, createdAt])
+}

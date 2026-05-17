@@ -1,0 +1,32 @@
+node_modules/
+
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+.kotlin/
+ios/
+android/
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.metro-health-check*
+
+# OS / build artifacts
+.DS_Store
+*.tsbuildinfo
+*.orig.*
+
+# Secrets / signing keys
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Local env files
+.env*.local

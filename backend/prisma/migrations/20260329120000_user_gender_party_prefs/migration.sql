@@ -1,0 +1,10 @@
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('UNSPECIFIED', 'MALE', 'FEMALE');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "gender" "Gender" NOT NULL DEFAULT 'UNSPECIFIED';
+ALTER TABLE "User" ADD COLUMN "prefersQuiet" BOOLEAN NOT NULL DEFAULT false;
+
+-- AlterTable
+ALTER TABLE "Party" ADD COLUMN "preferSameGender" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Party" ADD COLUMN "preferQuiet" BOOLEAN NOT NULL DEFAULT false;

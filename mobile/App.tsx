@@ -1,0 +1,32 @@
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppProvider } from './src/context/AppContext';
+import { NavigationRoot } from './src/navigation/NavigationRoot';
+import { colors } from './src/theme';
+
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.bg,
+    card: colors.card,
+    text: colors.text,
+    border: colors.border,
+    primary: colors.primary,
+  },
+};
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AppProvider>
+        <NavigationContainer theme={navTheme}>
+          <NavigationRoot />
+        </NavigationContainer>
+        <StatusBar style="dark" />
+      </AppProvider>
+    </SafeAreaProvider>
+  );
+}
