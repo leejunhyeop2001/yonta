@@ -29,6 +29,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TrustService trustService;
 
     public void sendVerificationCode(String email) {
         validateYonseiEmail(email);
@@ -104,6 +105,9 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        if (user.isSuspended()) {
+            throw new CustomException(ErrorCode.USER_SUSPENDED);
         }
 
         String token = jwtTokenProvider.createToken(user.getId(), user.getEmail(), user.getRole().name());

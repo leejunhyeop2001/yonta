@@ -5,6 +5,7 @@ import com.yonta.dto.request.PartyCreateRequest;
 import com.yonta.dto.request.PartyReviewRequest;
 import com.yonta.dto.response.PartyHistoryResponse;
 import com.yonta.dto.response.PartyResponse;
+import com.yonta.dto.response.PartyUpdateEvent;
 import com.yonta.exception.CustomException;
 import com.yonta.exception.ErrorCode;
 import com.yonta.repository.ParticipantRepository;
@@ -30,6 +31,9 @@ public class PartyService {
     private final ParticipantRepository participantRepository;
     private final PartyReviewRepository partyReviewRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final RealtimeEventPublisher eventPublisher;
+    private final TrustService trustService;
 
     @Transactional(readOnly = true)
     public List<PartyResponse> getAvailableParties(Location departure, Location destination, Long userId) {
@@ -50,6 +54,7 @@ public class PartyService {
 
     @Transactional
     public PartyResponse createParty(PartyCreateRequest request, Long userId) {
+        trustService.ensureUserCanParticipate(userId);
         User host = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -76,6 +81,7 @@ public class PartyService {
 
     @Transactional
     public PartyResponse joinParty(Long partyId, Long userId) {
+        trustService.ensureUserCanParticipate(userId);
         TaxiParty party = getParty(partyId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -93,6 +99,17 @@ public class PartyService {
             throw new CustomException(ErrorCode.PARTY_FULL);
         }
         participantRepository.save(Participant.createGuest(party, user));
+        publishPartyUpdate(party, "JOINED");
+        notificationService.notifyPartyMembers(
+                party,
+                userId,
+                NotificationType.MEMBER_JOINED,
+                "새 멤버가 참여했습니다",
+                String.format("현재 %d/%d명 · %s → %s",
+                        party.getCurrentCount(), party.getMaxCount(),
+                        party.getDeparture().getDisplayName(),
+                        party.getDestination().getDisplayName())
+        );
         return PartyResponse.from(party, true);
     }
 
@@ -109,6 +126,15 @@ public class PartyService {
 
         participantRepository.delete(participant);
         party.decrementCount();
+        publishPartyUpdate(party, "LEFT");
+        notificationService.notifyPartyMembers(
+                party,
+                userId,
+                NotificationType.MEMBER_LEFT,
+                "멤버가 파티를 나갔습니다",
+                String.format("현재 %d/%d명",
+                        party.getCurrentCount(), party.getMaxCount())
+        );
         return PartyResponse.from(party, false);
     }
 
@@ -163,23 +189,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<PartyHistoryResponse> getMyPartyHistory(Long userId) {
-        LocalDateTime now = LocalDateTime.now();
-        List<TaxiParty> pastParties = participantRepository.findByUserId(userId).stream()
-                .map(Participant::getTaxiParty)
-                .filter(p -> !p.getDepartureTime().isAfter(now))
-                .sorted(Comparator.comparing(TaxiParty::getDepartureTime).reversed())
-                .toList();
-
-        List<Long> partyIds = pastParties.stream().map(TaxiParty::getId).toList();
-        if (partyIds.isEmpty()) {
-            return List.of();
-        }
-        List<PartyReview> reviews = partyReviewRepository.findByReviewerIdAndTaxiPartyIdIn(userId, partyIds);
-        var reviewMap = reviews.stream().collect(Collectors.toMap(r -> r.getTaxiParty().getId(), r -> r));
-
-        return pastParties.stream()
-                .map(p -> PartyHistoryResponse.from(p, reviewMap.get(p.getId()), true))
-                .toList();
+        return trustService.buildPartyHistory(userId);
     }
 
     @Transactional
@@ -205,7 +215,11 @@ public class PartyService {
                 .comment(request.getComment())
                 .build();
         PartyReview saved = partyReviewRepository.save(review);
-        return PartyHistoryResponse.from(party, saved, true);
+        party.getHost().updateMannerTemp((request.getRating() - 3) * 0.5);
+        return trustService.buildPartyHistory(userId).stream()
+                .filter(h -> h.getParty().getId().equals(partyId))
+                .findFirst()
+                .orElse(PartyHistoryResponse.from(party, saved, true));
     }
 
     private TaxiParty getParty(Long partyId) {
@@ -269,5 +283,17 @@ public class PartyService {
         } catch (DateTimeParseException e) {
             throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
         }
+    }
+
+    private void publishPartyUpdate(TaxiParty party, String eventType) {
+        PartyUpdateEvent event = switch (eventType) {
+            case "JOINED" -> PartyUpdateEvent.joined(
+                    party.getId(), party.getStatus(), party.getCurrentCount(), party.getMaxCount());
+            case "LEFT" -> PartyUpdateEvent.left(
+                    party.getId(), party.getStatus(), party.getCurrentCount(), party.getMaxCount());
+            default -> PartyUpdateEvent.statusChanged(
+                    party.getId(), party.getStatus(), party.getCurrentCount(), party.getMaxCount());
+        };
+        eventPublisher.publishPartyUpdate(party.getId(), event);
     }
 }

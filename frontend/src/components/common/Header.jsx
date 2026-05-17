@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import NotificationBell from './NotificationBell';
 
 const NAV = [
   { to: '/rides', label: '합승 찾기', icon: '🚕' },
@@ -43,7 +44,8 @@ export default function Header() {
           </Link>
 
           {userName ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <NotificationBell enabled />
               <span className="text-sm font-semibold text-slate-700 max-w-[8rem] truncate" title={userName}>
                 {userName}
               </span>

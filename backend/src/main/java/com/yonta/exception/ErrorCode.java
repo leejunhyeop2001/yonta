@@ -22,6 +22,7 @@ public enum ErrorCode {
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "U002", "비밀번호가 일치하지 않습니다."),
+    USER_SUSPENDED(HttpStatus.FORBIDDEN, "U003", "이용 정지 상태입니다. 정지 해제 후 다시 이용해주세요."),
 
     // TaxiParty
     PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "합승 파티를 찾을 수 없습니다."),
@@ -39,6 +40,14 @@ public enum ErrorCode {
     INVALID_PARTY_OPTION(HttpStatus.BAD_REQUEST, "P010", "파티 옵션 값이 올바르지 않습니다."),
     PARTY_REVIEW_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "P011", "지난 파티에 대해서만 평가를 남길 수 있습니다."),
     PARTY_ALREADY_REVIEWED(HttpStatus.CONFLICT, "P012", "이미 해당 파티에 대한 평가를 남겼습니다."),
+    CHAT_NOT_MEMBER(HttpStatus.FORBIDDEN, "P016", "파티 멤버만 채팅에 참여할 수 있습니다."),
+    MEMBER_ALREADY_REVIEWED(HttpStatus.CONFLICT, "P017", "이미 해당 멤버를 평가했습니다."),
+    REVIEW_TARGET_NOT_IN_PARTY(HttpStatus.BAD_REQUEST, "P018", "같은 파티에 참여한 멤버만 평가/신고할 수 있습니다."),
+    CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "P019", "본인은 신고할 수 없습니다."),
+    NO_SHOW_ALREADY_REPORTED(HttpStatus.CONFLICT, "P020", "이미 해당 사용자를 노쇼 신고했습니다."),
+
+    // Notification
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "알림을 찾을 수 없습니다."),
 
     // Admin
     ADMIN_ACCESS_DENIED(HttpStatus.FORBIDDEN, "X001", "관리자 권한이 필요합니다.");

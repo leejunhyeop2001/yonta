@@ -37,4 +37,27 @@ public interface TaxiPartyRepository extends JpaRepository<TaxiParty, Long> {
             @Param("now") LocalDateTime now);
 
     List<TaxiParty> findByHostIdOrderByCreatedAtDesc(Long hostId);
+
+    @Query("SELECT tp FROM TaxiParty tp " +
+           "WHERE tp.status IN :statuses " +
+           "AND tp.departureTime <= :now")
+    List<TaxiParty> findByStatusInAndDepartureTimeBefore(
+            @Param("statuses") List<PartyStatus> statuses,
+            @Param("now") LocalDateTime now);
+
+    @Query("SELECT tp FROM TaxiParty tp " +
+           "WHERE tp.status = :status " +
+           "AND tp.departureTime <= :cutoff")
+    List<TaxiParty> findByStatusAndDepartureTimeBefore(
+            @Param("status") PartyStatus status,
+            @Param("cutoff") LocalDateTime cutoff);
+
+    @Query("SELECT tp FROM TaxiParty tp " +
+           "WHERE tp.status IN :statuses " +
+           "AND tp.departureTime > :from " +
+           "AND tp.departureTime <= :to")
+    List<TaxiParty> findPartiesDepartingBetween(
+            @Param("statuses") List<PartyStatus> statuses,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
 }
